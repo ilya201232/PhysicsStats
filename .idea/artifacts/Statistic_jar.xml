@@ -1,0 +1,10 @@
+<component name="ArtifactManager">
+  <artifact type="jar" build-on-make="true" name="Statistic:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/Statistic_jar</output-path>
+    <root id="archive" name="Statistic_jar.jar">
+      <element id="archive" name="Statistic.jar">
+        <element id="module-output" name="Statistic" />
+      </element>
+    </root>
+  </artifact>
+</component>

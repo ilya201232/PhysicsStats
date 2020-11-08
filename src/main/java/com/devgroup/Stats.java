@@ -1,72 +1,121 @@
 package com.devgroup;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+/**
+ * Абстрактный класс для наследования функциями.
+ * Он является основой для классов по вычислению погрешностей.
+ */
 public abstract class Stats {
+
+    /**
+     *  Выборки
+     */
     protected static final ArrayList<Double> selection = new ArrayList<>();
 
+    /**
+     * Abstract class for error calculations
+     * @return mean and error in calc
+     */
     public abstract Pair<Double> statsCalc();
 
+    /**
+     * Проверка на промахи
+     */
     protected static void MissCheck(){
 
+        System.out.println("\n________________________________\nПроверка на промахи!");
+
+
+        int scaling = BigDecimal.valueOf(selection.get(0)).scale()+2;
+
         //Вычисление размаха выборки
-        double R = selection.get(selection.size() - 1) - selection.get(0);
+        double R = round(selection.get(selection.size() - 1) - selection.get(0), scaling);
+
+        System.out.println("R = " + R);
 
         boolean f1 = true, f2 = true;
         double x_first, x_last;
 
 
-        double Upn = UPNTaking();
+        double Upn = round(UPNTaking(), 2);
 
         while (f1 || f2){
-            x_first = (selection.get(1) - selection.get(0))/R;
-            x_last = (selection.get(selection.size()-1) - selection.get(selection.size()-2))/R;
+            System.out.println("_____________________________\n");
+            x_first = round((selection.get(1) - selection.get(0))/R, scaling);
+            System.out.println("L(1) = (" + selection.get(1) + " - " + selection.get(0) +")/" + R + " = " + x_first);
+
+            x_last = round((selection.get(selection.size()-1) - selection.get(selection.size()-2))/R, scaling);
+            System.out.println("L(last) = (" + selection.get(selection.size()-1) + " - " + selection.get(selection.size()-2) +")/" + R + " = " + x_last);
 
             f1 = !(x_first < Upn);
             f2 = !(x_last < Upn);
 
             if (f1){
+                System.out.println("L(1) - промах, т.к. " + x_first + " >= " + Upn);
                 selection.remove(0);
+            }else{
+                System.out.println("L(1) - не промах, т.к. " + x_first + " < " + Upn);
             }
+
+            System.out.println();
 
             if (f2){
+                System.out.println("L(last) - промах, т.к. " + x_last + " >= " + Upn);
                 selection.remove(selection.size()-1);
+            }else{
+                System.out.println("L(last) - не промах, т.к. " + x_last + " < " + Upn);
             }
+
+            System.out.println("_____________________________\n");
+
         }
+
+        System.out.println("Прверка на промахи завершена!\n");
     }
 
+    /**
+     * Choosing student coefficient based on N
+     * @return student coefficient
+     */
     protected static double StudentError(){
 
-        float tpn = 0;
+        double tpn = 0;
         int N = selection.size();
 
         if (N <= 2){
-            tpn = 12.7f;
+            tpn = 12.7D;
         }else if (N == 3){
-            tpn = 4.3f;
+            tpn = 4.3D;
         }else if (N == 4){
-            tpn = 3.2f;
+            tpn = 3.2D;
         }else if (N == 5){
-            tpn = 2.8f;
+            tpn = 2.8D;
         }else if (N == 6){
-            tpn = 2.6f;
+            tpn = 2.6D;
         }else if (N == 7){
-            tpn = 2.5f;
+            tpn = 2.5D;
         }else if (N == 8){
-            tpn = 2.4f;
+            tpn = 2.4D;
         }else if (N == 9){
-            tpn = 2.3f;
+            tpn = 2.3D;
         }else if (N == 10){
-            tpn = 2.3f;
+            tpn = 2.3D;
         }else if (N == 100){
-            tpn = 2.0f;
+            tpn = 2.0D;
         }
 
         return tpn;
 
     }
 
+    /**
+     * Choosing Upn coefficient based on N
+     * @return Upn coefficient
+     */
     protected static double UPNTaking(){
         float Upn = 0;
         int N = selection.size();
@@ -94,9 +143,21 @@ public abstract class Stats {
         return Upn;
     }
 
+    /**
+     * Method printing message and current selection
+     * @param message - message to print before selection
+     */
     protected static void SelectionView(String message){
         System.out.println(message);
         System.out.println(Arrays.toString(selection.toArray()));
+    }
+
+    protected static double round (double value, int places){
+        if (places < 0) throw new IllegalArgumentException();
+
+        BigDecimal bd = new BigDecimal(Double.toString(value));
+        bd = bd.setScale(places, RoundingMode.HALF_UP);
+        return bd.doubleValue();
     }
 
 }
